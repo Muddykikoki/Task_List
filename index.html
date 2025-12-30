@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Tarefas 🏠</title>
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk1pbmhhcyBUYXJlZmFzIiwKICAic2hvcnRfbmFtZSI6ICJUYXJlZmFzIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjNGY0NmU1IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ3RleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCclM0UlRjAlOUYlOEYlQTAlM0MvdGV4dCUzRSUzQy9zdmclM0UiLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Tela de seleção de usuário */
+        .user-selection {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .user-selection h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .user-selection p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .user-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .user-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .user-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .user-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Tela principal */
+        .main-screen {
+            display: none;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .welcome {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Lista de tarefas */
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .task-item:active {
+            transform: scale(0.98);
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+            background: #f0f0f0;
+        }
+
+        .checkbox-wrapper {
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox {
+            width: 35px;
+            height: 35px;
+            border: 3px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .custom-checkbox.checked {
+            background: #667eea;
+        }
+
+        .custom-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-name {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .task-status {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .task-status.done {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        /* Botão gerenciar */
+        .manage-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 15px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .manage-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-msg {
+            color: #ff4444;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .task-manager {
+            display: none;
+        }
+
+        .task-manager.active {
+            display: block;
+        }
+
+        .task-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .remove-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .back-btn {
+            background: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tela de seleção de usuário -->
+        <div class="user-selection" id="userSelection">
+            <h1>🏠 Minhas Tarefas</h1>
+            <p>Quem está aqui?</p>
+            <div class="user-buttons">
+                <button class="user-btn" onclick="selectUser('Marlos')">👦 Marlos</button>
+                <button class="user-btn" onclick="selectUser('Luiz')">👧 Luiz</button>
+                <button class="user-btn" onclick="selectUser('Izabela')">👦 Izabela</button>
+            </div>
+        </div>
+
+        <!-- Tela principal -->
+        <div class="main-screen" id="mainScreen">
+            <button class="back-btn" onclick="logout()">← Voltar</button>
+            
+            <div class="header">
+                <div class="welcome">Olá, <span id="currentUserName"></span>! 👋</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">0 / 0 tarefas concluídas</div>
+            </div>
+
+            <div class="tasks-list" id="tasksList">
+                <div class="loading">Carregando tarefas...</div>
+            </div>
+        </div>
+
+        <!-- Botão gerenciar -->
+        <button class="manage-btn" id="manageBtn" onclick="openManageModal()">⚙ Gerenciar tarefas</button>
+    </div>
+
+    <!-- Modal de gerenciamento -->
+    <div class="modal" id="manageModal">
+        <div class="modal-content">
+            <!-- Tela de senha -->
+            <div id="passwordScreen">
+                <h2 class="modal-header">🔒 Senha necessária</h2>
+                <div class="input-group">
+                    <input type="password" id="passwordInput" placeholder="Digite a senha" />
+                </div>
+                <button class="btn btn-primary" onclick="checkPassword()">Entrar</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <div class="error-msg" id="errorMsg"></div>
+            </div>
+
+            <!-- Tela de gerenciamento -->
+            <div class="task-manager" id="taskManager">
+                <h2 class="modal-header">Gerenciar Tarefas</h2>
+                
+                <div class="input-group">
+                    <input type="text" id="newTaskInput" placeholder="Nome da nova tarefa" />
+                </div>
+                <button class="btn btn-primary" onclick="addTask()">➕ Adicionar Tarefa</button>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px; color: #666;">Tarefas existentes:</h3>
+                <div id="manageTasks"></div>
+
+                <button class="btn btn-secondary" style="margin-top: 20px;" onclick="closeModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase (você precisará adicionar suas credenciais)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDemoKey123456789",
+            authDomain: "demo-project.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        };
+
+        // Inicializar Firebase
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch (error) {
+            console.log("Firebase não configurado - usando dados locais", error);
+        }
+
+        // Variáveis globais
+        let currentUser = null;
+        let tasksUnsubscribe = null;
+        const PASSWORD = "estou pronto20";
+
+        // Dados locais para fallback
+        let localTasks = [
+            { id: '1', nome: '🛏️ Arrumar a cama', feito: false, feitoPor: null, hora: null },
+            { id: '2', nome: '🧹 Varrer o quarto', feito: false, feitoPor: null, hora: null },
+            { id: '3', nome: '🍽️ Guardar a louça', feito: false, feitoPor: null, hora: null },
+            { id: '4', nome: '🎒 Organizar a mochila', feito: false, feitoPor: null, hora: null },
+            { id: '5', nome: '🦷 Escovar os dentes', feito: false, feitoPor: null, hora: null }
+        ];
+
+        // Selecionar usuário
+        function selectUser(name) {
+            currentUser = name;
+            document.getElementById('currentUserName').textContent = name;
+            document.getElementById('userSelection').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'block';
+            loadTasks();
+        }
+
+        // Logout
+        function logout() {
+            if (tasksUnsubscribe) tasksUnsubscribe();
+            currentUser = null;
+            document.getElementById('userSelection').style.display = 'block';
+            document.getElementById('mainScreen').style.display = 'none';
+        }
+
+        // Carregar tarefas com listener em tempo real
+        function loadTasks() {
+            if (db) {
+                // Firebase - tempo real
+                tasksUnsubscribe = db.collection('tarefas')
+                    .orderBy('nome')
+                    .onSnapshot((snapshot) => {
+                        const tasks = [];
+                        snapshot.forEach((doc) => {
+                            tasks.push({ id: doc.id, ...doc.data() });
+                        });
+                        renderTasks(tasks);
+                    }, (error) => {
+                        console.log("Erro ao carregar tarefas:", error);
+                        renderTasks(localTasks);
+                    });
+            } else {
+                // Fallback local
+                renderTasks(localTasks);
+            }
+        }
+
+        // Renderizar tarefas
+        function renderTasks(tasks) {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+
+            if (tasks.length === 0) {
+                tasksList.innerHTML = '<div class="loading">Nenhuma tarefa cadastrada</div>';
+                return;
+            }
+
+            tasks.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.feito ? 'completed' : ''}`;
+                
+                const statusText = task.feito 
+                    ? `✓ Feito por ${task.feitoPor} às ${task.hora}`
+                    : 'Pendente';
+
+                taskItem.innerHTML = `
+                    <div class="checkbox-wrapper">
+                        <div class="custom-checkbox ${task.feito ? 'checked' : ''}" 
+                             onclick="toggleTask('${task.id}', ${!task.feito})"></div>
+                    </div>
+                    <div class="task-content">
+                        <div class="task-name">${task.nome}</div>
+                        <div class="task-status ${task.feito ? 'done' : ''}">${statusText}</div>
+                    </div>
+                `;
+                
+                tasksList.appendChild(taskItem);
+            });
+
+            updateProgress(tasks);
+        }
+
+        // Marcar/desmarcar tarefa
+        function toggleTask(taskId, newStatus) {
+            const now = new Date();
+            const hora = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            const updates = {
+                feito: newStatus,
+                feitoPor: newStatus ? currentUser : null,
+                hora: newStatus ? hora : null
+            };
+
+            if (db) {
+                db.collection('tarefas').doc(taskId).update(updates)
+                    .catch(error => console.log("Erro ao atualizar:", error));
+            } else {
+                const task = localTasks.find(t => t.id === taskId);
+                if (task) {
+                    Object.assign(task, updates);
+                    renderTasks(localTasks);
+                }
+            }
+        }
+
+        // Atualizar barra de progresso
+        function updateProgress(tasks) {
+            const completed = tasks.filter(t => t.feito).length;
+            const total = tasks.length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${completed} / ${total} tarefas concluídas`;
+        }
+
+        // Modal de gerenciamento
+        function openManageModal() {
+            document.getElementById('manageModal').classList.add('active');
+            document.getElementById('passwordScreen').style.display = 'block';
+            document.getElementById('taskManager').classList.remove('active');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('errorMsg').textContent = '';
+        }
+
+        function closeModal() {
+            document.getElementById('manageModal').classList.remove('active');
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            
+            if (password === PASSWORD) {
+                document.getElementById('passwordScreen').style.display = 'none';
+                document.getElementById('taskManager').classList.add('active');
+                loadManageTasks();
+            } else {
+                document.getElementById('errorMsg').textContent = 'Senha incorreta';
+            }
+        }
+
+        // Carregar tarefas no painel de gerenciamento
+        function loadManageTasks() {
+            if (db) {
+                db.collection('tarefas').orderBy('nome').get()
+                    .then(snapshot => {
+                        const tasks = [];
+                        snapshot.forEach(doc => {
+                            tasks.push({ id: doc.id, ...doc.data() });
+                        });
+                        renderManageTasks(tasks);
+                    });
+            } else {
+                renderManageTasks(localTasks);
+            }
+        }
+
+        function renderManageTasks(tasks) {
+            const container = document.getElementById('manageTasks');
+            container.innerHTML = '';
+
+            tasks.forEach(task => {
+                const item = document.createElement('div');
+                item.className = 'task-list-item';
+                item.innerHTML = `
+                    <span>${task.nome}</span>
+                    <button class="remove-btn" onclick="removeTask('${task.id}')">Remover</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Adicionar nova tarefa
+        function addTask() {
+            const input = document.getElementById('newTaskInput');
+            const taskName = input.value.trim();
+
+            if (!taskName) {
+                alert('Digite o nome da tarefa');
+                return;
+            }
+
+            const newTask = {
+                nome: taskName,
+                feito: false,
+                feitoPor: null,
+                hora: null
+            };
+
+            if (db) {
+                db.collection('tarefas').add(newTask)
+                    .then(() => {
+                        input.value = '';
+                        loadManageTasks();
+                    })
+                    .catch(error => console.log("Erro ao adicionar:", error));
+            } else {
+                newTask.id = Date.now().toString();
+                localTasks.push(newTask);
+                input.value = '';
+                renderManageTasks(localTasks);
+                renderTasks(localTasks);
+            }
+        }
+
+        // Remover tarefa
+        function removeTask(taskId) {
+            if (!confirm('Tem certeza que deseja remover esta tarefa?')) return;
+
+            if (db) {
+                db.collection('tarefas').doc(taskId).delete()
+                    .then(() => loadManageTasks())
+                    .catch(error => console.log("Erro ao remover:", error));
+            } else {
+                localTasks = localTasks.filter(t => t.id !== taskId);
+                renderManageTasks(localTasks);
+                renderTasks(localTasks);
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('manageModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
